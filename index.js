@@ -3,7 +3,7 @@ import axios from 'axios';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 
 const app = express();
-const PROXY_URL = 'http://zunrrpft-US-rotate:2826o444egna@p.webshare.io:80';
+const PROXY_URL = 'http://dms221222-rotate:0itj18l0719v@p.webshare.io:80';
 
 app.get('/proxy', async (req, res) => {
   const targetUrl = req.query.url;
