@@ -1,29 +1,26 @@
-const net = require('net');
+const express = require('express');
+const axios = require('axios');
+const { HttpsProxyAgent } = require('https-proxy-agent');
+const app = express();
 
-const LOCAL_PORT = 8888;
+const PROXY_URL = 'http://zunrrpft-US-rotate:2826o444egna@p.webshare.io:80';
 
-const PROXY_HOST = 'p.webshare.io';
-const PROXY_PORT = 80;
-const USERNAME = 'zunrrpft-US-rotate';
-const PASSWORD = '2826o444egna';
+app.get('/proxy', async (req, res) => {
+  const targetUrl = req.query.url;
+  if (!targetUrl || !targetUrl.startsWith('http')) {
+    return res.status(400).json({ error: 'Missing or invalid URL' });
+  }
 
-const server = net.createServer(clientSocket => {
-  const proxySocket = net.connect(PROXY_PORT, PROXY_HOST, () => {
-    const auth = Buffer.from(`${USERNAME}:${PASSWORD}`).toString('base64');
-    const connectReq = 
-      `HTTP/1.1 200 OK\r\n` +
-      `Proxy-Authorization: Basic ${auth}\r\n` +
-      `\r\n`;
-
-    proxySocket.write(connectReq);
-    clientSocket.pipe(proxySocket);
-    proxySocket.pipe(clientSocket);
-  });
-
-  proxySocket.on('error', () => clientSocket.destroy());
-  clientSocket.on('error', () => proxySocket.destroy());
+  try {
+    const agent = new HttpsProxyAgent(PROXY_URL);
+    const response = await axios.get(targetUrl, { httpsAgent: agent });
+    res.status(response.status).send(response.data);
+  } catch (err) {
+    res.status(500).json({ error: err.toString() });
+  }
 });
 
-server.listen(LOCAL_PORT, () => {
-  console.log(`Local proxy listening on 127.0.0.1:${LOCAL_PORT}`);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Proxy server listening on port ${PORT}`);
 });
