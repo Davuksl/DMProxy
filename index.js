@@ -1,13 +1,14 @@
-const express = require('express');
-const axios = require('axios');
-const { HttpsProxyAgent } = require('https-proxy-agent');
-const app = express();
+import express from 'express';
+import axios from 'axios';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 
 const PROXY_URL = 'http://zunrrpft-US-rotate:2826o444egna@p.webshare.io:80';
 
+const app = express();
+
 app.get('/proxy', async (req, res) => {
   const targetUrl = req.query.url;
-  if (!targetUrl || !targetUrl.startsWith('http')) {
+  if (!targetUrl?.startsWith('http')) {
     return res.status(400).json({ error: 'Missing or invalid URL' });
   }
 
@@ -16,7 +17,7 @@ app.get('/proxy', async (req, res) => {
     const response = await axios.get(targetUrl, { httpsAgent: agent });
     res.status(response.status).send(response.data);
   } catch (err) {
-    res.status(500).json({ error: err.toString() });
+    res.status(500).json({ error: err.message });
   }
 });
 
