@@ -1,0 +1,11 @@
+{
+  "name": "local-auth-proxy",
+  "version": "1.0.0",
+  "description": "Local proxy to authenticate and forward traffic to p.webshare.io",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "you",
+  "license": "MIT"
+}
