@@ -1,29 +1,32 @@
-import express from 'express';
-import axios from 'axios';
-import { HttpsProxyAgent } from 'https-proxy-agent';
+import express from "express";
+import fetch from "node-fetch";
+import cors from "cors";
 
 const app = express();
-const PROXY_URL = 'http://dms221222-rotate:0itj18l0719v@p.webshare.io:80';
+app.use(cors());
 
-app.get('/proxy', async (req, res) => {
+const USERNAME = "zunrrpft-US-rotate";
+const PASSWORD = "2826o444egna";
+const AUTH_HEADER = "Basic " + Buffer.from(`${USERNAME}:${PASSWORD}`).toString("base64");
+
+app.get("/proxy", async (req, res) => {
   const targetUrl = req.query.url;
-  if (!targetUrl?.startsWith('http')) {
-    return res.status(400).json({ error: 'Invalid URL' });
-  }
+  if (!targetUrl) return res.status(400).send("Missing url param");
 
   try {
-    const agent = new HttpsProxyAgent(PROXY_URL);
-    const response = await axios.get(targetUrl, {
-      httpsAgent: agent,
-      headers: { 'User-Agent': 'Mozilla/5.0 Chrome/122.0.0.0' },
-      responseType: 'text'
+    const proxyRes = await fetch(targetUrl, {
+      headers: {
+        "Proxy-Authorization": AUTH_HEADER
+      },
+      agent: new (await import("http-proxy-agent")).default(`http://${USERNAME}:${PASSWORD}@p.webshare.io:80`)
     });
 
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.send(response.data);
+    const html = await proxyRes.text();
+    res.send(html);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).send("Proxy error: " + err.message);
   }
 });
 
-app.listen(process.env.PORT || 3000);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log("Proxy server running on port " + PORT));
